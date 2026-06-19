@@ -3,6 +3,7 @@
 .vscode/
 .settings
 .project
+.factorypath
 .classpath
 .eclipse/
 .vaadin/
