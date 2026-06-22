@@ -77,16 +77,54 @@ public class TemplateHubPlugin implements HubPlugin {
     // HubPlugin SPI
     // -----------------------------------------------------------------------
 
+    /**
+     * Returns the plugin's immutable descriptor. HUB reads this once at install time to:
+     * <ol>
+     *   <li>Register the plugin in the {@code hub_schema.plugins} table</li>
+     *   <li>Add a sidebar navigation entry (icon + name linking to {@code path})</li>
+     *   <li>Create the PostgreSQL schema named {@code schema} (if not already present)</li>
+     * </ol>
+     *
+     * <h3>Field reference</h3>
+     * <pre>
+     * id          – snake_case key used as a stable identifier across versions.
+     *               Also used as the Flyway schema-history table prefix.
+     *               Example: "gym_tracker"
+     *
+     * name        – Human-readable label shown in the sidebar and plugin manager.
+     *               Example: "Gym Tracker"
+     *
+     * version     – Semantic version string.  HUB records this so the plugin manager
+     *               can show the installed version and detect upgrades.
+     *               Example: "1.0.0"
+     *
+     * description – One-sentence summary displayed on the plugin management page.
+     *               Example: "Track workouts, personal records and progress charts."
+     *
+     * path        – URL path owned by this plugin under the HUB root.
+     *               Must match &lt;plugin.path&gt; in pom.xml.
+     *               Example: "/gym"  →  https://hub.local/gym
+     *
+     * schema      – PostgreSQL schema created exclusively for this plugin's tables.
+     *               Must match &lt;plugin.schema&gt; in pom.xml.
+     *               Example: "gym_schema"
+     *
+     * icon        – Vaadin Lumo icon name shown next to the sidebar label.
+     *               Full list: https://vaadin.com/docs/latest/components/icons
+     *               Pass null to get the default puzzle-piece icon.
+     *               Example: "vaadin:dumbbell"
+     * </pre>
+     */
     @Override
     public PluginMetadata getMetadata() {
         return new PluginMetadata(
-                PLUGIN_ID,
-                PLUGIN_NAME,
-                PLUGIN_VERSION,
-                PLUGIN_DESC,
-                PLUGIN_PATH,    // ← tells HUB which URL path this plugin owns
-                PLUGIN_SCHEMA,  // ← tells HUB which PostgreSQL schema to create
-                PLUGIN_ICON
+                PLUGIN_ID,       // stable snake_case key, e.g. "my_plugin"
+                PLUGIN_NAME,     // sidebar label, e.g. "My Plugin"
+                PLUGIN_VERSION,  // semver, e.g. "1.0.0"
+                PLUGIN_DESC,     // one-sentence description for the plugin manager
+                PLUGIN_PATH,     // URL path this plugin owns, e.g. "/my-plugin"
+                PLUGIN_SCHEMA,   // dedicated PostgreSQL schema, e.g. "my_plugin_schema"
+                PLUGIN_ICON      // Vaadin icon name, or null for the default
         );
     }
 
