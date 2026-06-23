@@ -123,8 +123,7 @@ public class TemplateHubPlugin implements HubPlugin {
                 PLUGIN_VERSION,  // semver, e.g. "1.0.0"
                 PLUGIN_DESC,     // one-sentence description for the plugin manager
                 PLUGIN_PATH,     // URL path this plugin owns, e.g. "/my-plugin"
-                PLUGIN_SCHEMA,   // dedicated PostgreSQL schema, e.g. "my_plugin_schema"
-                PLUGIN_ICON      // Vaadin icon name, or null for the default
+                PLUGIN_SCHEMA    // dedicated PostgreSQL schema, e.g. "my_plugin_schema"
         );
     }
 
