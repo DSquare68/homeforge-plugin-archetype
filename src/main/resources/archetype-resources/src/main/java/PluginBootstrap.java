@@ -1,4 +1,7 @@
-package com.github.dsquare68.homeforgeplugin;
+#set( $symbol_pound = '#' )
+#set( $symbol_dollar = '$' )
+#set( $symbol_escape = '\' )
+package ${package};
 
 import org.pf4j.Plugin;
 import org.pf4j.PluginWrapper;
@@ -7,24 +10,19 @@ import org.pf4j.PluginWrapper;
  * PF4J {@link Plugin} bootstrap class.
  *
  * <p>This class is the entry point declared in {@code MANIFEST.MF} under
- * {@code Plugin-Class}. Keep it thin – delegate all real work to
- * {@link TemplateHubPlugin} which implements the HUB lifecycle SPI.
- *
- * <p><b>Plugin authors:</b> rename this class and update {@code pom.xml}:
- * <pre>
- *   &lt;Plugin-Class&gt;dev.homeforge.plugin.myplugin.MyPlugin&lt;/Plugin-Class&gt;
- * </pre>
+ * {@code Plugin-Class}. Keep it thin - delegate all real work to
+ * {@link HubPluginImpl} which implements the HUB lifecycle SPI.
  */
-public class TemplatePlugin extends Plugin {
+public class PluginBootstrap extends Plugin {
 
-    public TemplatePlugin(PluginWrapper wrapper) {
+    public PluginBootstrap(PluginWrapper wrapper) {
         super(wrapper);
     }
 
     @Override
     public void start() {
         // PF4J calls this when the plugin JAR is loaded.
-        // Spring wiring happens inside TemplateHubPlugin#onActivate.
+        // Spring wiring happens inside HubPluginImpl#onActivate.
     }
 
     @Override
