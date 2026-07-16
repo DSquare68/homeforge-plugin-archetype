@@ -47,7 +47,7 @@
         <dependency>
             <groupId>com.github.dsquare68</groupId>
             <artifactId>homeforge-api</artifactId>
-            <version>${symbol_dollar}{hub-plugin-api.version}</version>
+            <version>${hub-plugin-api.version}</version>
             <scope>provided</scope>
         </dependency>
 
@@ -55,7 +55,7 @@
         <dependency>
             <groupId>org.pf4j</groupId>
             <artifactId>pf4j</artifactId>
-            <version>${symbol_dollar}{pf4j.version}</version>
+            <version>${pf4j.version}</version>
             <scope>provided</scope>
         </dependency>
 
@@ -63,7 +63,7 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-core</artifactId>
-            <version>${symbol_dollar}{vaadin.version}</version>
+            <version>${vaadin.version}</version>
             <scope>provided</scope>
         </dependency>
 
@@ -74,12 +74,12 @@
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
-            <version>${symbol_dollar}{flyway.version}</version>
+            <version>${flyway.version}</version>
         </dependency>
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-database-postgresql</artifactId>
-            <version>${symbol_dollar}{flyway.version}</version>
+            <version>${flyway.version}</version>
         </dependency>
 
         <!-- Tests -->
@@ -98,7 +98,7 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.13.0</version>
                 <configuration>
-                    <release>${symbol_dollar}{maven.compiler.release}</release>
+                    <release>${maven.compiler.release}</release>
                 </configuration>
             </plugin>
 
@@ -115,12 +115,12 @@
                     <archive>
                         <manifestEntries>
                             <!-- PF4J required entries -->
-                            <Plugin-Id>${symbol_dollar}{project.artifactId}</Plugin-Id>
-                            <Plugin-Version>${symbol_dollar}{project.version}</Plugin-Version>
+                            <Plugin-Id>${project.artifactId}</Plugin-Id>
+                            <Plugin-Version>${project.version}</Plugin-Version>
                             <Plugin-Class>${package}.PluginBootstrap</Plugin-Class>
                             <!-- HUB custom entries - read by PluginManager without instantiation -->
-                            <Hub-Path>${symbol_dollar}{plugin.path}</Hub-Path>
-                            <Hub-Schema>${symbol_dollar}{plugin.schema}</Hub-Schema>
+                            <Hub-Path>${plugin.path}</Hub-Path>
+                            <Hub-Schema>${plugin.schema}</Hub-Schema>
                         </manifestEntries>
                     </archive>
                 </configuration>
