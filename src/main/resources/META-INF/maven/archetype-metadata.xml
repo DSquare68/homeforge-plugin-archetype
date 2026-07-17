@@ -24,16 +24,6 @@
         <requiredProperty key="pluginName">
             <defaultValue>My Plugin</defaultValue>
         </requiredProperty>
-
-        <!-- Semantic version reported to HUB via PluginMetadata (independent of the Maven ${version}) -->
-        <requiredProperty key="pluginVersion">
-            <defaultValue>1.0.0</defaultValue>
-        </requiredProperty>
-
-        <!-- One-sentence description shown on the plugin management page -->
-        <requiredProperty key="pluginDescription">
-            <defaultValue>A HUB plugin generated from the homeforge-plugin-archetype.</defaultValue>
-        </requiredProperty>
     </requiredProperties>
 
     <fileSets>
