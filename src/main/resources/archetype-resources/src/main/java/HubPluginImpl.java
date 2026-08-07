@@ -38,6 +38,9 @@ public class HubPluginImpl implements HubPlugin {
 
     private HubApi api;
 
+    /** This plugin's own database, from the properties file HUB wrote into the jar. */
+    private PluginDb db;
+
     // -----------------------------------------------------------------------
     // HubPlugin SPI
     // -----------------------------------------------------------------------
@@ -66,11 +69,12 @@ public class HubPluginImpl implements HubPlugin {
      * Called once on first install.
      *
      * <p>Run Flyway migrations here so the plugin's tables exist before
-     * any user interacts with the plugin.
+     * any user interacts with the plugin. They run against this plugin's own
+     * PostgreSQL role - see {@link PluginDb}.
      */
     @Override
     public void onInstall(HubApi api) {
-        runMigrations(api);
+        runMigrations();
     }
 
     /**
@@ -81,6 +85,7 @@ public class HubPluginImpl implements HubPlugin {
     @Override
     public void onActivate(HubApi api) {
         this.api = api;
+        this.db = PluginDb.load();
 
         // Register a dashboard widget (optional - delete if not needed)
         api.dashboard().registerWidget(
@@ -117,6 +122,10 @@ public class HubPluginImpl implements HubPlugin {
     @Override
     public void onDeactivate() {
         api.dashboard().unregisterWidget(PluginInfo.PLUGIN_ID + ".summary");
+        if (db != null) {
+            db.close();
+            this.db = null;
+        }
         this.api = null;
     }
 
@@ -126,13 +135,12 @@ public class HubPluginImpl implements HubPlugin {
      */
     @Override
     public void onUninstall() {
-        // Uncomment to drop the schema on uninstall:
-        // try (var conn = api.storage().dataSource().getConnection();
-        //      var stmt = conn.createStatement()) {
-        //     stmt.execute("DROP SCHEMA IF EXISTS " + PluginInfo.PLUGIN_SCHEMA + " CASCADE");
-        // } catch (Exception e) {
-        //     throw new RuntimeException("Failed to drop plugin schema", e);
-        // }
+        // Nothing to do: HUB drops this plugin's role and schema when it is
+        // removed, along with the credentials file inside the jar.
+        if (db != null) {
+            db.close();
+            this.db = null;
+        }
     }
 
     // -----------------------------------------------------------------------
@@ -146,15 +154,24 @@ public class HubPluginImpl implements HubPlugin {
      * {@code src/main/resources/db/migration/} and must follow the naming
      * convention {@code V<version>__<description>.sql}.
      */
-    private void runMigrations(HubApi api) {
-        Flyway flyway = Flyway.configure()
-                .dataSource(api.storage().dataSource())
+    private void runMigrations() {
+        if (db == null) {
+            db = PluginDb.load();
+        }
+
+        // Configure with THIS plugin's classloader: Flyway defaults to the
+        // thread context classloader, which under PF4J belongs to the HUB
+        // host and cannot see db/migration inside the plugin jar.
+        Flyway flyway = Flyway.configure(HubPluginImpl.class.getClassLoader())
+                // This plugin's own role - not HUB's - so migrations can only
+                // touch this plugin's schema.
+                .dataSource(db.dataSource())
                 // Isolate history table inside the plugin schema
-                .table(PluginInfo.PLUGIN_SCHEMA + "_flyway_schema_history")
+                .table(db.schema() + "_flyway_schema_history")
                 // All migration scripts under db/migration/ in the plugin jar
                 .locations("classpath:db/migration")
-                // Create schema if it does not exist yet
-                .schemas(PluginInfo.PLUGIN_SCHEMA)
+                // HUB already created the schema; this keeps local runs working
+                .schemas(db.schema())
                 .createSchemas(true)
                 .load();
 

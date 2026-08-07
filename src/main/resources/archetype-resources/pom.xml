@@ -34,7 +34,10 @@
         <hub-plugin-api.version>1.0.0-SNAPSHOT</hub-plugin-api.version>
         <pf4j.version>3.12.0</pf4j.version>
         <vaadin.version>24.5.0</vaadin.version>
-        <flyway.version>10.15.0</flyway.version>
+        <flyway.version>13.2.0</flyway.version>
+        <!-- Provided by the HUB host; keep in sync with the host's versions -->
+        <hikaricp.version>7.0.2</hikaricp.version>
+        <postgresql.version>42.7.11</postgresql.version>
     </properties>
 
     <dependencies>
@@ -64,6 +67,24 @@
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-core</artifactId>
             <version>${vaadin.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!--
+            PostgreSQL driver and HikariCP - provided by the host. The plugin
+            opens its own pool from the credentials HUB writes into this jar
+            (see PluginDb), so it needs these at compile time only.
+        -->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>${postgresql.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.zaxxer</groupId>
+            <artifactId>HikariCP</artifactId>
+            <version>${hikaricp.version}</version>
             <scope>provided</scope>
         </dependency>
 
@@ -140,6 +161,16 @@
                         <goals><goal>shade</goal></goals>
                         <configuration>
                             <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <!--
+                                Merge META-INF/services entries instead of letting
+                                one jar's file overwrite another's. Flyway finds its
+                                database support (e.g. PostgreSQL) through that
+                                ServiceLoader file - without this, migrations fail
+                                with "Unsupported Database".
+                            -->
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                            </transformers>
                             <filters>
                                 <filter>
                                     <artifact>*:*</artifact>
