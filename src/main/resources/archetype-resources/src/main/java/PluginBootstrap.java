@@ -1,4 +1,4 @@
-package com.github.dsquare68.template;
+package ${package};
 
 import org.pf4j.Plugin;
 import org.pf4j.PluginWrapper;

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    What 'mvn archetype:generate' asks for and what it copies.
+
+    Everything under archetype-resources/ is filtered through Velocity, so
+    ${package}, ${artifactId}, ${version} and the required properties below are
+    substituted into the generated sources.
+-->
+<archetype-descriptor
+        xmlns="https://maven.apache.org/plugins/maven-archetype-plugin/archetype-descriptor/1.1.0"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="https://maven.apache.org/plugins/maven-archetype-plugin/archetype-descriptor/1.1.0 https://maven.apache.org/xsd/archetype-descriptor-1.1.0.xsd"
+        name="homeforge-plugin">
+
+    <requiredProperties>
+        <!--
+            URL path segment served by HUB - WITHOUT a leading slash.
+            'gym' becomes <plugin.path>/gym</plugin.path> and is reachable at
+            https://hub.local/gym
+        -->
+        <requiredProperty key="pluginPath">
+            <defaultValue>${artifactId}</defaultValue>
+        </requiredProperty>
+
+        <!-- PostgreSQL schema owned by the plugin, e.g. gym_schema -->
+        <requiredProperty key="pluginSchema">
+            <defaultValue>${artifactId}_schema</defaultValue>
+        </requiredProperty>
+
+        <!-- Stable snake_case id: Plugin-Id in MANIFEST.MF, and the name of the
+             credentials file HUB writes into the jar (<pluginId>.properties) -->
+        <requiredProperty key="pluginId">
+            <defaultValue>${artifactId}</defaultValue>
+        </requiredProperty>
+
+        <!-- Human-readable name: sidebar label and dashboard card title -->
+        <requiredProperty key="pluginName">
+            <defaultValue>${artifactId}</defaultValue>
+        </requiredProperty>
+
+        <requiredProperty key="pluginDescription">
+            <defaultValue>A HUB plugin.</defaultValue>
+        </requiredProperty>
+
+        <!-- Version of homeforge-plugin-starter-parent the generated POM inherits -->
+        <requiredProperty key="starterParentVersion">
+            <defaultValue>0.0.1-SNAPSHOT</defaultValue>
+        </requiredProperty>
+    </requiredProperties>
+
+    <fileSets>
+        <!-- packaged: laid down under the generated ${package} directories -->
+        <fileSet filtered="true" packaged="true" encoding="UTF-8">
+            <directory>src/main/java</directory>
+            <includes>
+                <include>**/*.java</include>
+            </includes>
+        </fileSet>
+
+        <fileSet filtered="true" encoding="UTF-8">
+            <directory>src/main/resources</directory>
+            <includes>
+                <include>**/*.sql</include>
+                <include>**/*.idx</include>
+            </includes>
+        </fileSet>
+
+        <fileSet filtered="true" encoding="UTF-8">
+            <directory></directory>
+            <includes>
+                <include>README.md</include>
+                <include>.gitignore</include>
+            </includes>
+        </fileSet>
+    </fileSets>
+</archetype-descriptor>

@@ -1,98 +1,94 @@
-# Homeforge Plugin Starter Parent
+# Homeforge Plugin Archetype
 
-Parent POM and starter template for [HUB](https://github.com/homeforge/hub)
-plugins.
+Maven archetype that scaffolds a new [HUB](https://github.com/homeforge/hub)
+plugin. It is the companion of
+[`homeforge-plugin-starter-parent`](../homeforge-plugin-starter-parent), which
+lives in its own repository:
 
-| Module | Artifact | Packaging | What it is |
-|--------|----------|-----------|------------|
-| *(root)* | `homeforge-plugin-starter-parent` | `pom` | Dependencies, versions and jar/shade build config that every plugin inherits |
-| [`template/`](template) | `homeforge-plugin-template` | `jar` | A compilable starter plugin — copy it to begin a new one |
+| Repository | Artifact | Packaging | What it is |
+|------------|----------|-----------|------------|
+| `homeforge-plugin-starter-parent` | `homeforge-plugin-starter-parent` | `pom` | Dependencies, pinned versions and jar/shade build config that every plugin inherits |
+| *this one* | `homeforge-plugin-archetype` | `maven-archetype` | Generates a compilable starter plugin whose POM inherits that parent |
 
-## Install the parent
+## Install
 
 ```bash
 mvn install
 ```
 
-This installs `com.github.dsquare68:homeforge-plugin-starter-parent:0.0.1-SNAPSHOT`
-into your local repository, so plugins in other checkouts can inherit from it.
+Installs `com.github.dsquare68:homeforge-plugin-archetype:0.0.1-SNAPSHOT` into
+your local repository. The starter parent must be installed too, or generated
+projects will not resolve their parent:
 
-## Use it in a plugin
-
-A plugin POM only has to say who it is and where it lives — the parent supplies
-the rest:
-
-```xml
-<parent>
-    <groupId>com.github.dsquare68</groupId>
-    <artifactId>homeforge-plugin-starter-parent</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
-</parent>
-
-<artifactId>gym</artifactId>
-<name>Gym Tracker</name>
-<description>Track workouts, personal records and progress charts.</description>
-
-<properties>
-    <plugin.path>/gym</plugin.path>
-    <plugin.schema>gym_schema</plugin.schema>
-    <plugin.bootstrap.class>com.github.dsquare68.gym.PluginBootstrap</plugin.bootstrap.class>
-</properties>
-
-<build>
-    <plugins>
-        <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-compiler-plugin</artifactId>
-        </plugin>
-        <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-jar-plugin</artifactId>
-        </plugin>
-        <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-shade-plugin</artifactId>
-        </plugin>
-    </plugins>
-</build>
+```bash
+mvn -f ../homeforge-plugin-starter-parent install
 ```
 
-Version and groupId are inherited, so a child normally declares neither.
+## Generate a plugin
 
-### Properties a child sets
+Interactive — Maven prompts for every property:
 
-| Property | Description | Parent default |
-|----------|-------------|----------------|
-| `plugin.path` | URL path served by HUB, e.g. `/gym` | `/my-plugin` |
-| `plugin.schema` | PostgreSQL schema for this plugin's tables | `my_plugin_schema` |
-| `plugin.bootstrap.class` | Class extending `org.pf4j.Plugin`, written as `Plugin-Class` | `${project.groupId}.${project.artifactId}.PluginBootstrap` |
+```bash
+mvn archetype:generate -DarchetypeGroupId=com.github.dsquare68 -DarchetypeArtifactId=homeforge-plugin-archetype -DarchetypeVersion=0.0.1-SNAPSHOT
+```
 
-### What the parent already provides
+Non-interactive:
 
-**Dependencies** — inherited directly, nothing to declare:
+```bash
+mvn archetype:generate -B -DarchetypeGroupId=com.github.dsquare68 -DarchetypeArtifactId=homeforge-plugin-archetype -DarchetypeVersion=0.0.1-SNAPSHOT -DgroupId=com.github.dsquare68 -DartifactId=gym -Dversion=0.0.1-SNAPSHOT -Dpackage=com.github.dsquare68.gym -DpluginPath=gym -DpluginSchema=gym_schema -DpluginId=gym -DpluginName="Gym Tracker" -DpluginDescription="Track workouts, personal records and progress charts."
+```
 
-| Dependency | Scope | Why |
-|------------|-------|-----|
-| `homeforge-api` | provided | The SPI your plugin implements |
-| `pf4j` | provided | Plugin container, supplied by the host |
-| `vaadin-core` | provided | UI, supplied by the host (version via `vaadin-bom`) |
-| `postgresql`, `HikariCP` | provided | For the plugin's own pool (see `PluginDb`) |
-| `flyway-core`, `flyway-database-postgresql` | compile | Migrations; **shaded into the jar** — the host does not provide these |
-| `junit-jupiter` | test | |
+Then:
 
-**Build** — `maven-compiler-plugin`, `maven-jar-plugin` and
-`maven-shade-plugin` are fully configured in `<pluginManagement>`; a child
-declares them by coordinates only. Between them they set the Java release,
-write the PF4J/HUB manifest entries, and shade Flyway in while keeping
-`provided` libraries out.
+```bash
+cd gym && mvn clean package
+```
 
-**Pinned versions** — Java 21, Vaadin 25.1.7, PF4J 3.12.0, Flyway 13.2.0,
-HikariCP 7.0.2, PostgreSQL 42.7.11. Keep these in step with the HUB host.
+### Properties
+
+| Property | Description | Default |
+|----------|-------------|---------|
+| `groupId`, `artifactId`, `version`, `package` | Standard Maven coordinates | — |
+| `pluginPath` | URL path segment served by HUB, **without** a leading slash — `gym` becomes `/gym` | `${artifactId}` |
+| `pluginSchema` | PostgreSQL schema for this plugin's tables | `${artifactId}_schema` |
+| `pluginId` | Stable snake_case id — `Plugin-Id` in the manifest and the name of the credentials file HUB writes into the jar | `${artifactId}` |
+| `pluginName` | Sidebar label and dashboard card title | `${artifactId}` |
+| `pluginDescription` | Shown in HUB's plugin list | `A HUB plugin.` |
+| `starterParentVersion` | Version of the starter parent to inherit | `0.0.1-SNAPSHOT` |
+
+`pluginPath`, `pluginSchema` and `pluginId` are written into both `pom.xml`
+(`plugin.path` / `plugin.schema`) and `PluginInfo.java`, so a generated project
+starts out consistent — keep them in step if you change them later.
+
+## What gets generated
+
+```
+<artifactId>/
+├── pom.xml                        <- inherits homeforge-plugin-starter-parent
+├── README.md
+├── .gitignore
+└── src/main/
+    ├── java/<package>/
+    │   ├── PluginBootstrap.java    <- PF4J entry point (Plugin-Class)
+    │   ├── HubPluginImpl.java      <- HUB lifecycle: metadata, migrations, routes
+    │   ├── PluginInfo.java         <- identity constants
+    │   ├── PluginDb.java           <- the plugin's own PostgreSQL pool
+    │   └── view/
+    │       ├── MainView.java       <- Vaadin view served at plugin.path
+    │       └── DashboardWidget.java
+    └── resources/
+        ├── db/migration/V1__init.sql
+        └── META-INF/extensions.idx <- PF4J extension index
+```
+
+The generated POM declares nothing but identity and plugin coordinates — see
+the starter parent's README for the dependencies, pinned versions and manifest
+entries it supplies.
 
 ## How path and schema reach HUB
 
-Path and schema are written into `MANIFEST.MF` at build time so HUB reads them
-before the plugin class is even loaded:
+The parent's `maven-jar-plugin` config writes them into `MANIFEST.MF` at build
+time, so HUB reads them before the plugin class is even loaded:
 
 ```
 pom.xml                             maven-jar-plugin
@@ -105,28 +101,15 @@ PluginMetadata.path = "/gym"          → sidebar entry + Vaadin route
 PluginMetadata.schema = "gym_schema"  → Flyway creates schema, scopes DataSource
 ```
 
-## Starting a new plugin
+## Working on the archetype
 
-Copy [`template/`](template) out of this repo, then:
+Everything under `src/main/resources/archetype-resources/` is a Velocity
+template: `${package}`, `${artifactId}`, `${version}` and the properties above
+are substituted at generation time. `src/main/resources/META-INF/maven/archetype-metadata.xml`
+declares which properties are prompted for and which files are copied.
 
-1. Rename the directory and set `<artifactId>`, `<name>`, `<description>`.
-2. Rename the Java package from `com.github.dsquare68.template` to your own.
-3. Update `plugin.path`, `plugin.schema` and `plugin.bootstrap.class` in
-   `pom.xml`, and the matching constants in `PluginInfo.java`.
-4. Update `src/main/resources/META-INF/extensions.idx` to your
-   `HubPluginImpl`'s fully qualified name.
-5. Rewrite `db/migration/V1__init.sql` for your own tables.
-6. Drop the `<relativePath>` from `<parent>` if the plugin lives outside this
-   repo.
-
-See [`template/README.md`](template/README.md) for what each generated file
-does.
-
-## Verifying a change to the parent
+Verify a change end to end:
 
 ```bash
-mvn -o clean install
+mvn clean install && mvn archetype:generate -B -DarchetypeGroupId=com.github.dsquare68 -DarchetypeArtifactId=homeforge-plugin-archetype -DarchetypeVersion=0.0.1-SNAPSHOT -DgroupId=com.example -DartifactId=smoke -Dversion=0.0.1-SNAPSHOT -Dpackage=com.example.smoke -DoutputDirectory=target/it && (cd target/it/smoke && mvn -o clean package)
 ```
-
-Builds the parent and the template module, and confirms the template still
-compiles, shades and produces the right manifest.

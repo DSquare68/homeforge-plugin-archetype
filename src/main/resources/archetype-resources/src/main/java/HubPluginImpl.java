@@ -1,10 +1,10 @@
-package com.github.dsquare68.template;
+package ${package};
 
 import com.github.dsquare68.homeforgeapi.dashboard.WidgetDescriptor;
 import com.github.dsquare68.homeforgeapi.spi.HubApi;
 import com.github.dsquare68.homeforgeapi.spi.HubPlugin;
 import com.github.dsquare68.homeforgeapi.spi.PluginMetadata;
-import com.github.dsquare68.template.view.MainView;
+import ${package}.view.MainView;
 
 import org.flywaydb.core.Flyway;
 import org.pf4j.Extension;

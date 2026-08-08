@@ -5,38 +5,40 @@
     <modelVersion>4.0.0</modelVersion>
 
     <!--
-        Everything a plugin needs - dependencies, versions, jar/shade setup -
-        is inherited from here. A standalone plugin outside this repo uses the
-        exact same block, minus the <relativePath>.
+        Dependencies, pinned versions and the jar/shade build are all inherited.
+        <relativePath/> stops Maven looking for the parent on disk - it is
+        resolved from the repository, so run 'mvn install' in the
+        homeforge-plugin-starter-parent checkout once before building this.
     -->
     <parent>
         <groupId>com.github.dsquare68</groupId>
         <artifactId>homeforge-plugin-starter-parent</artifactId>
-        <version>0.0.1-SNAPSHOT</version>
-        <relativePath>../pom.xml</relativePath>
+        <version>${starterParentVersion}</version>
+        <relativePath/>
     </parent>
 
-    <artifactId>homeforge-plugin-template</artifactId>
+    <groupId>${groupId}</groupId>
+    <artifactId>${artifactId}</artifactId>
+    <version>${version}</version>
     <packaging>jar</packaging>
 
-    <name>Plugin Template</name>
-    <description>A starter HUB plugin - copy this module and make it your own.</description>
+    <name>${pluginName}</name>
+    <description>${pluginDescription}</description>
 
     <properties>
         <!--
             ================================================================
-            PLUGIN CONFIGURATION - edit these
+            PLUGIN CONFIGURATION
             ================================================================
-            plugin.path   : URL path served by HUB, e.g. /gym
-                            Accessible at https://hub.local/gym
+            plugin.path   : URL path served by HUB - https://hub.local/${pluginPath}
             plugin.schema : PostgreSQL schema for this plugin's tables
-            The values below are written into MANIFEST.MF by the parent's
-            maven-jar-plugin config; keep PluginInfo.java in sync with them.
+            The parent's maven-jar-plugin config writes these into
+            MANIFEST.MF; keep PluginInfo.java in sync with them.
             ================================================================
         -->
-        <plugin.path>/template</plugin.path>
-        <plugin.schema>template_schema</plugin.schema>
-        <plugin.bootstrap.class>com.github.dsquare68.template.PluginBootstrap</plugin.bootstrap.class>
+        <plugin.path>/${pluginPath}</plugin.path>
+        <plugin.schema>${pluginSchema}</plugin.schema>
+        <plugin.bootstrap.class>${package}.PluginBootstrap</plugin.bootstrap.class>
     </properties>
 
     <build>

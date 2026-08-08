@@ -1,4 +1,4 @@
-package com.github.dsquare68.template.view;
+package ${package}.view;
 
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;

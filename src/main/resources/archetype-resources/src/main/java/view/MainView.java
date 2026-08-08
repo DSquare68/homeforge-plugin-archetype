@@ -1,7 +1,7 @@
-package com.github.dsquare68.template.view;
+package ${package}.view;
 
 import com.github.dsquare68.homeforgeapi.ui.BaseLayout;
-import com.github.dsquare68.template.PluginInfo;
+import ${package}.PluginInfo;
 
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Paragraph;
@@ -21,11 +21,11 @@ import com.vaadin.flow.router.Route;
  *
  * <p>The route value here mirrors {@link PluginInfo#PLUGIN_PATH} without its
  * leading slash - HUB registers the actual route dynamically via
- * {@link com.github.dsquare68.template.HubPluginImpl#registerRoutes} so this
+ * {@link ${package}.HubPluginImpl#registerRoutes} so this
  * {@code @Route} annotation is used only during local development / unit tests.
  */
 @PageTitle(PluginInfo.TITLE)
-@Route(layout = BaseLayout.class, value = "template")
+@Route(layout = BaseLayout.class, value = "${pluginPath}")
 public class MainView extends VerticalLayout {
 
     public MainView() {
