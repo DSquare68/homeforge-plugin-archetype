@@ -1,13 +1,13 @@
 -- ============================================================
 -- V1__init.sql
--- Initial schema setup for ${pluginSchema}.
+-- Initial schema setup for template_schema.
 --
 -- Flyway runs this script inside the schema created by HubPluginImpl.
 -- Rename / extend as needed.
 -- ============================================================
 
 -- Example table - replace or delete as needed.
-CREATE TABLE IF NOT EXISTS ${pluginSchema}.example_items
+CREATE TABLE IF NOT EXISTS template_schema.example_items
 (
     id          UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id     UUID        NOT NULL,          -- references hub_schema.users.id (logical FK)
@@ -19,4 +19,4 @@ CREATE TABLE IF NOT EXISTS ${pluginSchema}.example_items
 
 -- Index lookups by user
 CREATE INDEX IF NOT EXISTS idx_example_items_user_id
-    ON ${pluginSchema}.example_items (user_id);
+    ON template_schema.example_items (user_id);

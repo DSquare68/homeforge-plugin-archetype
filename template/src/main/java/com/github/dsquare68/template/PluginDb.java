@@ -1,7 +1,4 @@
-#set( $symbol_pound = '#' )
-#set( $symbol_dollar = '$' )
-#set( $symbol_escape = '\' )
-package ${package};
+package com.github.dsquare68.template;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,16 +18,16 @@ import com.zaxxer.hikari.HikariDataSource;
  * resource:
  *
  * <pre>{@code
- * db.url=jdbc:postgresql://host:5432/hub?currentSchema=${pluginSchema}
- * db.username=plugin_${pluginId}
+ * db.url=jdbc:postgresql://host:5432/hub?currentSchema=template_schema
+ * db.username=plugin_template
  * db.password=<generated>
- * db.schema=${pluginSchema}
+ * db.schema=template_schema
  * db.driver-class-name=org.postgresql.Driver
  * }</pre>
  *
- * <p>The role owns {@code ${pluginSchema}} and has no grants on {@code hub_schema}
+ * <p>The role owns {@code template_schema} and has no grants on {@code hub_schema}
  * or any other plugin's schema, so this connection can only ever touch this
- * plugin's own data. Use it instead of {@code HubApi${symbol_pound}storage()${symbol_pound}dataSource()},
+ * plugin's own data. Use it instead of {@code HubApi#storage()#dataSource()},
  * which runs with HUB's credentials.
  *
  * <p>The file is generated per install and contains a password — never commit

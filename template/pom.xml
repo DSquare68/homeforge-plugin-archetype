@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <!--
+        Everything a plugin needs - dependencies, versions, jar/shade setup -
+        is inherited from here. A standalone plugin outside this repo uses the
+        exact same block, minus the <relativePath>.
+    -->
+    <parent>
+        <groupId>com.github.dsquare68</groupId>
+        <artifactId>homeforge-plugin-starter-parent</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>homeforge-plugin-template</artifactId>
+    <packaging>jar</packaging>
+
+    <name>Plugin Template</name>
+    <description>A starter HUB plugin - copy this module and make it your own.</description>
+
+    <properties>
+        <!--
+            ================================================================
+            PLUGIN CONFIGURATION - edit these
+            ================================================================
+            plugin.path   : URL path served by HUB, e.g. /gym
+                            Accessible at https://hub.local/gym
+            plugin.schema : PostgreSQL schema for this plugin's tables
+            The values below are written into MANIFEST.MF by the parent's
+            maven-jar-plugin config; keep PluginInfo.java in sync with them.
+            ================================================================
+        -->
+        <plugin.path>/template</plugin.path>
+        <plugin.schema>template_schema</plugin.schema>
+        <plugin.bootstrap.class>com.github.dsquare68.template.PluginBootstrap</plugin.bootstrap.class>
+    </properties>
+
+    <build>
+        <!--
+            Coordinates only - all configuration lives in the parent's
+            <pluginManagement>.
+        -->
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+</project>

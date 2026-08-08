@@ -1,15 +1,10 @@
-#set( $symbol_pound = '#' )
-#set( $symbol_dollar = '$' )
-#set( $symbol_escape = '\' )
-package ${package};
+package com.github.dsquare68.template;
 
 import com.github.dsquare68.homeforgeapi.dashboard.WidgetDescriptor;
 import com.github.dsquare68.homeforgeapi.spi.HubApi;
 import com.github.dsquare68.homeforgeapi.spi.HubPlugin;
 import com.github.dsquare68.homeforgeapi.spi.PluginMetadata;
-import ${package}.view.DashboardWidget;
-import ${package}.view.MainView;
-import com.vaadin.flow.router.RouteConfiguration;
+import com.github.dsquare68.template.view.MainView;
 
 import org.flywaydb.core.Flyway;
 import org.pf4j.Extension;
@@ -21,7 +16,7 @@ import org.pf4j.Extension;
  * <ul>
  *   <li>Declares plugin metadata (id, name, <b>path</b>, <b>schema</b>)</li>
  *   <li>Runs Flyway migrations against the plugin-scoped schema on install</li>
- *   <li>Registers Vaadin routes so the UI becomes reachable at {@link PluginInfo${symbol_pound}PLUGIN_PATH}</li>
+ *   <li>Registers Vaadin routes so the UI becomes reachable at {@link PluginInfo#PLUGIN_PATH}</li>
  *   <li>Optionally contributes a dashboard widget</li>
  * </ul>
  *
@@ -98,9 +93,9 @@ public class HubPluginImpl implements HubPlugin {
     }
 
     /**
-     * Register Vaadin routes so the UI is reachable at {@link PluginInfo${symbol_pound}PLUGIN_PATH}.
+     * Register Vaadin routes so the UI is reachable at {@link PluginInfo#PLUGIN_PATH}.
      *
-     * <p>HUB calls this after {@link ${symbol_pound}onActivate(HubApi)} and stores the
+     * <p>HUB calls this after {@link #onActivate(HubApi)} and stores the
      * returned registrations so it can remove them on deactivation.
      */
     @Override
@@ -117,7 +112,7 @@ public class HubPluginImpl implements HubPlugin {
 
     /**
      * Called when the plugin is disabled. Remove in-memory resources.
-     * Do NOT drop database tables here - use {@link ${symbol_pound}onUninstall()} for that.
+     * Do NOT drop database tables here - use {@link #onUninstall()} for that.
      */
     @Override
     public void onDeactivate() {
@@ -148,7 +143,7 @@ public class HubPluginImpl implements HubPlugin {
     // -----------------------------------------------------------------------
 
     /**
-     * Run Flyway migrations scoped to {@link PluginInfo${symbol_pound}PLUGIN_SCHEMA}.
+     * Run Flyway migrations scoped to {@link PluginInfo#PLUGIN_SCHEMA}.
      *
      * <p>Migration scripts live in
      * {@code src/main/resources/db/migration/} and must follow the naming

@@ -1,7 +1,4 @@
-#set( $symbol_pound = '#' )
-#set( $symbol_dollar = '$' )
-#set( $symbol_escape = '\' )
-package ${package};
+package com.github.dsquare68.template;
 
 import org.pf4j.Plugin;
 import org.pf4j.PluginWrapper;
