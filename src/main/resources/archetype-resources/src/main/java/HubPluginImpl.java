@@ -1,8 +1,10 @@
 package ${package};
 
 import com.github.dsquare68.homeforgeapi.dashboard.WidgetDescriptor;
+import com.github.dsquare68.homeforgeapi.db.PluginDbConnection;
 import com.github.dsquare68.homeforgeapi.spi.HubApi;
 import com.github.dsquare68.homeforgeapi.spi.HubPlugin;
+import com.github.dsquare68.homeforgeapi.spi.PluginIcon;
 import com.github.dsquare68.homeforgeapi.spi.PluginMetadata;
 import ${package}.view.MainView;
 
@@ -20,9 +22,14 @@ import org.pf4j.Extension;
  *   <li>Optionally contributes a dashboard widget</li>
  * </ul>
  *
+ * <p>It is also HUB's handle on this plugin: HUB resolves it with
+ * {@code getExtensions(HubPlugin.class)} and reads identity through
+ * {@link #getMetadata()} and the database through {@link #db()}. Anything HUB
+ * should be able to reach belongs on the SPI, not on a class of your own.
+ *
  * <p>Plugin identity (id, name, version, description, path, schema) lives in
- * {@link PluginInfo} and must stay in sync with the {@code plugin.path} /
- * {@code plugin.schema} properties in {@code pom.xml}.
+ * {@link PluginInfo} and must stay in sync with the {@code plugin.*} properties
+ * in {@code pom.xml}.
  */
 @Extension
 public class HubPluginImpl implements HubPlugin {
@@ -32,9 +39,6 @@ public class HubPluginImpl implements HubPlugin {
     // -----------------------------------------------------------------------
 
     private HubApi api;
-
-    /** This plugin's own database, from the properties file HUB wrote into the jar. */
-    private PluginDb db;
 
     // -----------------------------------------------------------------------
     // HubPlugin SPI
@@ -47,6 +51,10 @@ public class HubPluginImpl implements HubPlugin {
      *   <li>Add a sidebar navigation entry (icon + name linking to {@code path})</li>
      *   <li>Create the PostgreSQL schema named {@code schema} (if not already present)</li>
      * </ol>
+     *
+     * <p>Overriding is optional: the default reads the same values back out of the
+     * jar manifest. It is spelled out here so your identity is visible in code -
+     * edit {@link PluginInfo}, and keep it in sync with {@code pom.xml}.
      */
     @Override
     public PluginMetadata getMetadata() {
@@ -61,11 +69,28 @@ public class HubPluginImpl implements HubPlugin {
     }
 
     /**
+     * The image HUB shows next to this plugin in the sidebar and the plugin
+     * manager, read from {@link PluginInfo#PLUGIN_ICON} inside the jar.
+     *
+     * <p>{@code src/main/resources/icon.png} ships empty, so until you replace it
+     * with a real PNG this returns {@code null} and HUB draws its placeholder -
+     * an empty file counts as no icon.
+     *
+     * <p>Overriding is optional: the default does exactly this with the same
+     * conventional path. It is spelled out here so the icon is visible in code -
+     * delete the method, or point {@link PluginInfo#PLUGIN_ICON} elsewhere.
+     */
+    @Override
+    public byte[] getIconBytes() {
+        return PluginIcon.load(HubPluginImpl.class, PluginInfo.PLUGIN_ICON);
+    }
+
+    /**
      * Called once on first install.
      *
      * <p>Run Flyway migrations here so the plugin's tables exist before
      * any user interacts with the plugin. They run against this plugin's own
-     * PostgreSQL role - see {@link PluginDb}.
+     * PostgreSQL role - see {@link #db()}.
      */
     @Override
     public void onInstall(HubApi api) {
@@ -80,7 +105,6 @@ public class HubPluginImpl implements HubPlugin {
     @Override
     public void onActivate(HubApi api) {
         this.api = api;
-        this.db = PluginDb.load();
 
         // Register a dashboard widget (optional - delete if not needed)
         api.dashboard().registerWidget(
@@ -113,14 +137,13 @@ public class HubPluginImpl implements HubPlugin {
     /**
      * Called when the plugin is disabled. Remove in-memory resources.
      * Do NOT drop database tables here - use {@link #onUninstall()} for that.
+     *
+     * <p>The connection pool behind {@link #db()} is not yours to close: HUB owns
+     * it and shuts it down after this method returns.
      */
     @Override
     public void onDeactivate() {
         api.dashboard().unregisterWidget(PluginInfo.PLUGIN_ID + ".summary");
-        if (db != null) {
-            db.close();
-            this.db = null;
-        }
         this.api = null;
     }
 
@@ -131,11 +154,8 @@ public class HubPluginImpl implements HubPlugin {
     @Override
     public void onUninstall() {
         // Nothing to do: HUB drops this plugin's role and schema when it is
-        // removed, along with the credentials file inside the jar.
-        if (db != null) {
-            db.close();
-            this.db = null;
-        }
+        // removed, along with the credentials file inside the jar and the
+        // connection pool behind db().
     }
 
     // -----------------------------------------------------------------------
@@ -147,12 +167,11 @@ public class HubPluginImpl implements HubPlugin {
      *
      * <p>Migration scripts live in
      * {@code src/main/resources/db/migration/} and must follow the naming
-     * convention {@code V<version>__<description>.sql}.
+     * convention {@code V<version>__<description>.sql}. The folder starts
+     * empty - with no scripts this is a no-op.
      */
     private void runMigrations() {
-        if (db == null) {
-            db = PluginDb.load();
-        }
+        PluginDbConnection db = db();
 
         // Configure with THIS plugin's classloader: Flyway defaults to the
         // thread context classloader, which under PF4J belongs to the HUB

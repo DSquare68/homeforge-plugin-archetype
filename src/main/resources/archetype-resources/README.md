@@ -2,8 +2,8 @@
 
 A [HUB](https://github.com/homeforge/hub) plugin generated from
 `homeforge-plugin-archetype`: PF4J entry point, HUB lifecycle class, a Vaadin
-view, a dashboard widget, and a Flyway migration. It compiles and packages
-as-is.
+view, a dashboard widget, and Flyway wired up for your own migrations. It
+compiles and packages as-is.
 
 Build config — dependencies, pinned versions, jar/shade setup — is inherited
 from `com.github.dsquare68:homeforge-plugin-starter-parent`. Install that once
@@ -21,8 +21,13 @@ mvn -f ../homeforge-plugin-starter-parent install
 | Schema   | `${pluginSchema}` |
 | Id       | `${pluginId}` |
 
-These live in `pom.xml` (`plugin.path` / `plugin.schema`) and
+These live in `pom.xml` (the `plugin.*` properties) and in
 `${package}.PluginInfo` — keep both in sync if you change them.
+
+The pom values are written into `MANIFEST.MF` at build time, and that is where
+HUB reads them from; `PluginInfo` is what *your* code uses, and what
+`HubPluginImpl#getMetadata()` hands back. That override is optional — delete it
+and the manifest values are used instead.
 
 ## Layout
 
@@ -34,29 +39,59 @@ ${artifactId}/
     │   ├── PluginBootstrap.java             <- PF4J entry point
     │   ├── HubPluginImpl.java               <- HUB lifecycle (path, schema, routes)
     │   ├── PluginInfo.java                  <- plugin identity constants
-    │   ├── PluginDb.java                    <- this plugin's own DB pool
     │   └── view/
     │       ├── MainView.java                <- served at plugin.path
     │       └── DashboardWidget.java         <- dashboard card
     └── resources/
-        ├── db/migration/
-        │   └── V1__init.sql                 <- Flyway migration
+        ├── icon.png                          <- plugin icon (empty placeholder)
+        ├── db/migration/                    <- put Flyway migrations here (empty)
         └── META-INF/
             └── extensions.idx               <- PF4J extension index
 ```
 
+## Set your plugin icon
+
+`src/main/resources/icon.png` is the image HUB shows in the sidebar and the
+plugin manager. It ships as an empty file — replace it with a real PNG and it is
+picked up on the next build, no wiring needed. While it is empty HUB draws its
+own placeholder instead.
+
+The path is `${package}.PluginInfo.PLUGIN_ICON`, read by
+`HubPluginImpl#getIconBytes()`. Keep another name or another folder if you
+prefer — point the constant at it:
+
+```java
+public static final String PLUGIN_ICON = "icons/my-plugin.png";
+```
+
 ## Write your database migrations
+
+The folder ships empty — no schema is assumed. Users and their accounts belong
+to HUB, so reference them by id instead of creating your own user tables.
 
 Add SQL files to `src/main/resources/db/migration/`:
 
 ```
-V1__init.sql          <- already provided, edit the example table
+V1__init.sql
 V2__add_column.sql
 ...
 ```
 
-Flyway runs them in order on first install, scoped to your schema, using this
-plugin's own PostgreSQL role — see `PluginDb`.
+Flyway runs them in order on first install, scoped to your schema, on this
+plugin's own PostgreSQL role — `db()`, inherited from `HubPlugin`. With no
+scripts present it is a no-op, so you can ignore it until you need a table.
+
+## Talk to your database
+
+`db()` is available anywhere in `HubPluginImpl`, no setup and nothing to close:
+
+```java
+DataSource ds = db().dataSource();
+```
+
+It is a connection pool on a role that owns `${pluginSchema}` and has no grants
+anywhere else, so it can only ever touch your own data. HUB reaches the same
+pool through the same method, which is how it closes it when your plugin stops.
 
 ## Build your UI
 

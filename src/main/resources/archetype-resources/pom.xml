@@ -13,7 +13,7 @@
     <parent>
         <groupId>com.github.dsquare68</groupId>
         <artifactId>homeforge-plugin-starter-parent</artifactId>
-        <version>${starterParentVersion}</version>
+        <version>0.0.1-SNAPSHOT</version>
         <relativePath/>
     </parent>
 
@@ -30,14 +30,20 @@
             ================================================================
             PLUGIN CONFIGURATION
             ================================================================
-            plugin.path   : URL path served by HUB - https://hub.local/${pluginPath}
-            plugin.schema : PostgreSQL schema for this plugin's tables
-            The parent's maven-jar-plugin config writes these into
-            MANIFEST.MF; keep PluginInfo.java in sync with them.
+            plugin.path        : URL path served by HUB - https://hub.local/${pluginPath}
+            plugin.schema      : PostgreSQL schema for this plugin's tables
+            plugin.name        : sidebar label and dashboard card title
+            plugin.description : one-line summary in the plugin manager
+
+            The parent's maven-jar-plugin config writes all of these into
+            MANIFEST.MF, which is where HUB reads a plugin's metadata from
+            without loading its classes. Keep PluginInfo.java in sync with them.
             ================================================================
         -->
         <plugin.path>/${pluginPath}</plugin.path>
         <plugin.schema>${pluginSchema}</plugin.schema>
+        <plugin.name>${pluginName}</plugin.name>
+        <plugin.description>${pluginDescription}</plugin.description>
         <plugin.bootstrap.class>${package}.PluginBootstrap</plugin.bootstrap.class>
     </properties>
 

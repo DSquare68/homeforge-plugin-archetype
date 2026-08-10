@@ -62,6 +62,19 @@
             <includes>
                 <include>**/*.sql</include>
                 <include>**/*.idx</include>
+                <!-- keeps the empty db/migration/ folder in generated projects -->
+                <include>**/.gitkeep</include>
+            </includes>
+        </fileSet>
+
+        <!--
+            Binary resources - copied byte for byte. Running icon.png through
+            Velocity would corrupt a real image, so this fileSet is NOT filtered.
+        -->
+        <fileSet encoding="UTF-8">
+            <directory>src/main/resources</directory>
+            <includes>
+                <include>**/*.png</include>
             </includes>
         </fileSet>
 
