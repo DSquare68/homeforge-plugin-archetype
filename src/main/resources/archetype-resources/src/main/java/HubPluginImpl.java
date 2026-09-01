@@ -1,11 +1,14 @@
 package ${package};
 
+import java.util.List;
+
 import com.github.dsquare68.homeforgeapi.dashboard.WidgetDescriptor;
 import com.github.dsquare68.homeforgeapi.db.PluginDbConnection;
 import com.github.dsquare68.homeforgeapi.spi.HubApi;
 import com.github.dsquare68.homeforgeapi.spi.HubPlugin;
 import com.github.dsquare68.homeforgeapi.spi.PluginIcon;
 import com.github.dsquare68.homeforgeapi.spi.PluginMetadata;
+import com.github.dsquare68.homeforgeapi.spi.PluginRoute;
 import ${package}.view.MainView;
 
 import org.flywaydb.core.Flyway;
@@ -18,7 +21,8 @@ import org.pf4j.Extension;
  * <ul>
  *   <li>Declares plugin metadata (id, name, <b>path</b>, <b>schema</b>)</li>
  *   <li>Runs Flyway migrations against the plugin-scoped schema on install</li>
- *   <li>Registers Vaadin routes so the UI becomes reachable at {@link PluginInfo#PLUGIN_PATH}</li>
+ *   <li>Contributes the Vaadin route(s) that become reachable at {@link PluginInfo#PLUGIN_PATH}</li>
+ *   <li>Contributes a REST controller reachable at {@code /api/plugins/${pluginId}/...}</li>
  *   <li>Optionally contributes a dashboard widget</li>
  * </ul>
  *
@@ -117,21 +121,31 @@ public class HubPluginImpl implements HubPlugin {
     }
 
     /**
-     * Register Vaadin routes so the UI is reachable at {@link PluginInfo#PLUGIN_PATH}.
-     *
-     * <p>HUB calls this after {@link #onActivate(HubApi)} and stores the
-     * returned registrations so it can remove them on deactivation.
+     * Vaadin routes this plugin contributes. HUB reads this after
+     * {@link #onActivate(HubApi)} and registers each one under
+     * {@link PluginInfo#PLUGIN_PATH}, removing them again on deactivation -
+     * you never call {@code RouteConfiguration} yourself.
      */
     @Override
-    public void registerRoutes(String routes) {
-        // Primary view - accessible at PluginInfo.PLUGIN_PATH
-        //routes.setRoute(
-        //        stripLeadingSlash(PluginInfo.PLUGIN_PATH),
-        //        MainView.class
-        //);
+    public List<PluginRoute> routes() {
+        return List.of(
+                // "" -> the plugin's own base path, PluginInfo.PLUGIN_PATH
+                new PluginRoute("", MainView.class)
 
-        // Add more sub-routes here:
-        // routes.setRoute(stripLeadingSlash(PluginInfo.PLUGIN_PATH) + "/settings", SettingsView.class);
+                // Add more sub-routes here:
+                // , new PluginRoute("settings", SettingsView.class)
+        );
+    }
+
+    /**
+     * REST controllers this plugin contributes. HUB reads this after
+     * {@link #onActivate(HubApi)} and registers every annotated method under
+     * {@code /api/plugins/${pluginId}/...} regardless of what
+     * {@code @RequestMapping} declares - see {@link ExampleController}.
+     */
+    @Override
+    public List<Object> restControllers() {
+        return List.of(new ExampleController(api));
     }
 
     /**
@@ -190,10 +204,5 @@ public class HubPluginImpl implements HubPlugin {
                 .load();
 
         flyway.migrate();
-    }
-
-    /** {@code "/my-plugin"} -&gt; {@code "my-plugin"} (Vaadin route format). */
-    private static String stripLeadingSlash(String path) {
-        return path.startsWith("/") ? path.substring(1) : path;
     }
 }

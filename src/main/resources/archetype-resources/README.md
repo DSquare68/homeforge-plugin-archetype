@@ -38,6 +38,7 @@ ${artifactId}/
     ├── java/...
     │   ├── PluginBootstrap.java             <- PF4J entry point
     │   ├── HubPluginImpl.java               <- HUB lifecycle (path, schema, routes)
+    │   ├── ExampleController.java           <- REST API example
     │   ├── PluginInfo.java                  <- plugin identity constants
     │   └── view/
     │       ├── MainView.java                <- served at plugin.path
@@ -96,7 +97,21 @@ pool through the same method, which is how it closes it when your plugin stops.
 ## Build your UI
 
 `MainView` is the Vaadin view served at `/${pluginPath}`. Add sub-views and
-register their routes in `HubPluginImpl#registerRoutes`.
+contribute their routes from `HubPluginImpl#routes()` — HUB reads that list
+and registers/removes the routes itself; you never call Vaadin's
+`RouteConfiguration` directly.
+
+## Build your REST API
+
+`ExampleController` shows the pattern: a plain class with normal Spring MVC
+annotations (`@GetMapping`, `@PostMapping`, ...), contributed from
+`HubPluginImpl#restControllers()`. Whatever path you declare, HUB always
+serves it at `/api/plugins/${pluginId}/...` and requires an authenticated
+HUB session — you never configure routing prefixes or security yourself.
+The one thing that's different from an ordinary Spring Boot controller:
+nothing is `@Autowired` here, since your plugin has no Spring context of its
+own — pass in `HubApi` (and anything else the controller needs) through the
+constructor, the same way `HubPluginImpl` does.
 
 ## Use platform APIs
 

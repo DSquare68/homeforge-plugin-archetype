@@ -21,7 +21,7 @@ import com.vaadin.flow.router.Route;
  *
  * <p>The route value here mirrors {@link PluginInfo#PLUGIN_PATH} without its
  * leading slash - HUB registers the actual route dynamically via
- * {@link ${package}.HubPluginImpl#registerRoutes} so this
+ * {@link ${package}.HubPluginImpl#routes()} so this
  * {@code @Route} annotation is used only during local development / unit tests.
  */
 @PageTitle(PluginInfo.TITLE)
